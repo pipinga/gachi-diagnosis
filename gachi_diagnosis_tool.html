@@ -1,79 +1,64 @@
 
+
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <title>ガチ体型診断ツール</title>
+  <meta charset="UTF-8" />
+  <title>体型診断ツール</title>
   <style>
-    body {
-      font-family: sans-serif;
-      padding: 2em;
-      max-width: 600px;
-      margin: auto;
-    }
-    label {
-      display: block;
-      margin-top: 1em;
-    }
-    input {
-      width: 100%;
-      padding: 0.4em;
-      margin-top: 0.2em;
-    }
-    button {
-      margin-top: 1em;
-      padding: 0.5em 1em;
-      font-weight: bold;
-    }
-    #result {
-      margin-top: 2em;
-      font-size: 1.1em;
-      font-weight: bold;
-    }
+    body { font-family: sans-serif; max-width: 600px; margin: 2em auto; }
+    label, input, button { display: block; margin-top: 1em; }
+    #result { margin-top: 1em; font-weight: bold; }
   </style>
 </head>
 <body>
-  <h2>ガチ体型診断ツール</h2>
-  <form onsubmit="event.preventDefault(); diagnoseGachi();">
-    <label>身長 (cm):<input type="number" id="height" required></label>
-    <label>体重 (kg):<input type="number" id="weight" required></label>
-    <label>体脂肪率 (%):<input type="number" id="bodyFat" required></label>
-    <button type="submit">診断する</button>
-  </form>
+  <h2>身長・体重・体脂肪率から体型分類</h2>
+  <label>身長 (cm): <input type="number" id="height" /></label>
+  <label>体重 (kg): <input type="number" id="weight" /></label>
+  <label>体脂肪率 (%): <input type="number" id="bodyFat" /></label>
+  <button onclick="diagnose()">診断する</button>
   <div id="result"></div>
 
   <script>
-    function diagnoseGachi() {
-      const height = parseFloat(document.getElementById('height').value);
-      const weight = parseFloat(document.getElementById('weight').value);
-      const bodyFatPercent = parseFloat(document.getElementById('bodyFat').value) / 100;
+    function diagnose() {
+      const height = parseFloat(document.getElementById("height").value);
+      const weight = parseFloat(document.getElementById("weight").value);
+      const bodyFatPercent = parseFloat(document.getElementById("bodyFat").value);
 
       if (!height || !weight || !bodyFatPercent) {
-        document.getElementById('result').innerText = '入力値を確認してください';
+        document.getElementById("result").innerText = "すべての項目を入力してください。";
         return;
       }
 
-      const fatMass = weight * bodyFatPercent;
-      const structureMass = weight * 0.23 + 6;
+      const fatMass = weight * (bodyFatPercent / 100);
+      const structureMass = height * 0.1 + 4;  // 身長比例の構造体重
       const muscleMass = weight - fatMass - structureMass;
       const volume = fatMass / 0.9 + muscleMass / 1.1;
-      const scale = height / 180;
-      const scaledVolume = volume / scale;
+      const scaledVolume = volume / (height / 180);  // 体積を身長180cmにスケーリング
 
-      let category = '';
-      if (scaledVolume < 50) {
-        category = 'ガリガリガチムチ（精密機械のようなボディ）';
-      } else if (scaledVolume < 58) {
-        category = 'ガチムチ';
-      } else if (scaledVolume < 66) {
-        category = 'ガチポチャ';
-      } else if (scaledVolume < 74) {
-        category = 'ガチデブ';
+      let category = "";
+
+      if (weight <= 60) {
+        category = "ガリ子";
+      } else if (bodyFatPercent < 17 && scaledVolume < 53) {
+        category = "細マッチョ";
+      } else if (bodyFatPercent >= 17 && bodyFatPercent < 25 && scaledVolume < 53) {
+        category = "お腹ぽっこり中年体型";
+      } else if (bodyFatPercent < 17 && scaledVolume >= 53) {
+        category = "マッチョ";
+      } else if (bodyFatPercent >= 25 && bodyFatPercent < 30 && scaledVolume < 53) {
+        category = "ポチャ";
+      } else if (bodyFatPercent < 25 && scaledVolume < 58) {
+        category = "ガチムチ";
+      } else if (bodyFatPercent < 30 && scaledVolume < 74) {
+        category = "ガチポチャ";
+      } else if (bodyFatPercent < 35 && scaledVolume < 90) {
+        category = "ガチデブ";
       } else {
-        category = 'デブ';
+        category = "デブ";
       }
 
-      document.getElementById('result').innerHTML =
+      document.getElementById("result").innerHTML =
         `診断結果：<strong>${category}</strong><br>` +
         `脂肪量: ${fatMass.toFixed(1)} kg / 筋肉量: ${muscleMass.toFixed(1)} kg / 体積: ${volume.toFixed(1)} L`;
     }
