@@ -3,65 +3,60 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8" />
-  <title>体型診断ツール</title>
-  <style>
-    body { font-family: sans-serif; max-width: 600px; margin: 2em auto; }
-    label, input, button { display: block; margin-top: 1em; }
-    #result { margin-top: 1em; font-weight: bold; }
-  </style>
+    <meta charset="UTF-8">
+    <title>あなたのガチ度診断</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 2em; background: #f8f9fa; }
+        h1 { color: #333; }
+        label { display: block; margin-top: 1em; }
+        input[type="number"] { width: 100px; }
+        button { margin-top: 1em; padding: 0.5em 1em; }
+        #result { margin-top: 2em; font-size: 1.2em; color: #006400; }
+    </style>
 </head>
 <body>
-  <h2>身長・体重・体脂肪率から体型分類</h2>
-  <label>身長 (cm): <input type="number" id="height" /></label>
-  <label>体重 (kg): <input type="number" id="weight" /></label>
-  <label>体脂肪率 (%): <input type="number" id="bodyFat" /></label>
-  <button onclick="diagnose()">診断する</button>
-  <div id="result"></div>
+    <h1>あなたの「ガチ度」を診断！</h1>
+    <label>身長（cm）<input type="number" id="height" value="180"></label>
+    <label>体重（kg）<input type="number" id="weight" value="90"></label>
+    <label>体脂肪率（%）<input type="number" id="fat" value="20"></label>
+    <button onclick="diagnose()">診断する</button>
+    <div id="result"></div>
 
-  <script>
-    function diagnose() {
-      const height = parseFloat(document.getElementById("height").value);
-      const weight = parseFloat(document.getElementById("weight").value);
-      const bodyFatPercent = parseFloat(document.getElementById("bodyFat").value);
+    <script>
+        function diagnose() {
+            const height = parseFloat(document.getElementById("height").value);
+            const weight = parseFloat(document.getElementById("weight").value);
+            const fat = parseFloat(document.getElementById("fat").value);
+            const density = 1.64;
+            const volume = weight / density;
+            const structuralWeight = 17 * Math.pow(height / 180, 2);
+            const fatMass = weight * (fat / 100);
+            const muscleMass = weight - structuralWeight - fatMass;
 
-      if (!height || !weight || !bodyFatPercent) {
-        document.getElementById("result").innerText = "すべての項目を入力してください。";
-        return;
-      }
+            let category = "ヤバい体型です";
 
-      const fatMass = weight * (bodyFatPercent / 100);
-      const structureMass = height * 0.1 + 4;  // 身長比例の構造体重
-      const muscleMass = weight - fatMass - structureMass;
-      const volume = fatMass / 0.9 + muscleMass / 1.1;
-      const scaledVolume = volume / (height / 180);  // 体積を身長180cmにスケーリング
+            if (volume < 41.5) {
+                category = "ガリ子";
+            } else if (volume < 53 && fat < 17) {
+                category = "細マッチョ";
+            } else if (volume >= 53 && fat < 17) {
+                category = "マッチョ";
+            } else if (volume < 53 && fat >= 17 && fat < 25) {
+                category = "ぽっこり";
+            } else if (volume < 58 && fat < 25) {
+                category = "ガチムチ";
+            } else if (volume < 74 && fat < 30) {
+                category = "ガチポチャ";
+            } else if (volume < 53 && fat < 30) {
+                category = "ポチャ";
+            } else if (volume < 90) {
+                category = "ガチデブ";
+            } else {
+                category = "デブ";
+            }
 
-      let category = "";
-
-      if (weight <= 60) {
-        category = "ガリ子";
-      } else if (bodyFatPercent < 17 && scaledVolume < 53) {
-        category = "細マッチョ";
-      } else if (bodyFatPercent >= 17 && bodyFatPercent < 25 && scaledVolume < 53) {
-        category = "お腹ぽっこり中年体型";
-      } else if (bodyFatPercent < 17 && scaledVolume >= 53) {
-        category = "マッチョ";
-      } else if (bodyFatPercent >= 25 && bodyFatPercent < 30 && scaledVolume < 53) {
-        category = "ポチャ";
-      } else if (bodyFatPercent < 25 && scaledVolume < 58) {
-        category = "ガチムチ";
-      } else if (bodyFatPercent < 30 && scaledVolume < 74) {
-        category = "ガチポチャ";
-      } else if (bodyFatPercent < 35 && scaledVolume < 90) {
-        category = "ガチデブ";
-      } else {
-        category = "デブ";
-      }
-
-      document.getElementById("result").innerHTML =
-        `診断結果：<strong>${category}</strong><br>` +
-        `脂肪量: ${fatMass.toFixed(1)} kg / 筋肉量: ${muscleMass.toFixed(1)} kg / 体積: ${volume.toFixed(1)} L`;
-    }
-  </script>
+            document.getElementById("result").innerText = `あなたの体型は「${category}」です。`;
+        }
+    </script>
 </body>
 </html>
